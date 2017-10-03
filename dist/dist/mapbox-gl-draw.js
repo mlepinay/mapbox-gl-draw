@@ -7729,7 +7729,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             ctx.map.off('load', setup.connect);
             clearInterval(mapLoadedInterval);
 
-            setup.removeLayers();
+            // setup.removeLayers();
             ctx.ui.removeButtons();
             ctx.events.removeEventListeners();
             ctx.map = null;

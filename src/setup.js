@@ -14,7 +14,7 @@ module.exports = function(ctx) {
       ctx.map.off('load', setup.connect);
       clearInterval(mapLoadedInterval);
 
-      setup.removeLayers();
+      // setup.removeLayers();
       ctx.ui.removeButtons();
       ctx.events.removeEventListeners();
       ctx.map = null;
