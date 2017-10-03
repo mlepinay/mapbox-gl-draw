@@ -7721,9 +7721,14 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       module.exports = function (ctx) {
 
         var controlContainer = null;
+        var mapLoadedInterval = null;
 
         var setup = {
           onRemove: function onRemove() {
+            // Stop connect attempt in the event that control is removed before map is loaded
+            ctx.map.off('load', setup.connect);
+            clearInterval(mapLoadedInterval);
+
             setup.removeLayers();
             ctx.ui.removeButtons();
             ctx.events.removeEventListeners();
@@ -7735,6 +7740,12 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             controlContainer = null;
 
             return this;
+          },
+          connect: function connect() {
+            ctx.map.off('load', setup.connect);
+            clearInterval(mapLoadedInterval);
+            setup.addLayers();
+            ctx.events.addEventListeners();
           },
           onAdd: function onAdd(map) {
             ctx.map = map;
@@ -7753,21 +7764,12 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
               map.dragPan.enable();
             }
 
-            var intervalId = null;
-
-            var connect = function connect() {
-              map.off('load', connect);
-              clearInterval(intervalId);
-              setup.addLayers();
-              ctx.events.addEventListeners();
-            };
-
             if (map.loaded()) {
-              connect();
+              setup.connect();
             } else {
-              map.on('load', connect);
-              intervalId = setInterval(function () {
-                if (map.loaded()) connect();
+              map.on('load', setup.connect);
+              mapLoadedInterval = setInterval(function () {
+                if (map.loaded()) setup.connect();
               }, 16);
             }
 
@@ -7799,13 +7801,22 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
             ctx.store.render();
           },
+          // Check for layers and sources before attempting to remove
+          // If user adds draw control and removes it before the map is loaded, layers and sources will be missing
           removeLayers: function removeLayers() {
             ctx.options.styles.forEach(function (style) {
-              ctx.map.removeLayer(style.id);
+              if (ctx.map.getLayer(style.id)) {
+                ctx.map.removeLayer(style.id);
+              }
             });
 
-            ctx.map.removeSource(Constants.sources.COLD);
-            ctx.map.removeSource(Constants.sources.HOT);
+            if (ctx.map.getSource(Constants.sources.COLD)) {
+              ctx.map.removeSource(Constants.sources.COLD);
+            }
+
+            if (ctx.map.getSource(Constants.sources.HOT)) {
+              ctx.map.removeSource(Constants.sources.HOT);
+            }
           }
         };
 
