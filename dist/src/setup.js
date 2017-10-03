@@ -1,15 +1,17 @@
-const events = require('./events');
-const Store = require('./store');
-const ui = require('./ui');
-const Constants = require('./constants');
+'use strict';
 
-module.exports = function(ctx) {
+var events = require('./events');
+var Store = require('./store');
+var ui = require('./ui');
+var Constants = require('./constants');
 
-  let controlContainer = null;
-  let mapLoadedInterval = null;
+module.exports = function (ctx) {
 
-  const setup = {
-    onRemove: function() {
+  var controlContainer = null;
+  var mapLoadedInterval = null;
+
+  var setup = {
+    onRemove: function onRemove() {
       // Stop connect attempt in the event that control is removed before map is loaded
       ctx.map.off('load', setup.connect);
       clearInterval(mapLoadedInterval);
@@ -26,13 +28,13 @@ module.exports = function(ctx) {
 
       return this;
     },
-    connect: function() {
+    connect: function connect() {
       ctx.map.off('load', setup.connect);
       clearInterval(mapLoadedInterval);
       setup.addLayers();
       ctx.events.addEventListeners();
     },
-    onAdd: function(map) {
+    onAdd: function onAdd(map) {
       ctx.map = map;
       ctx.events = events(ctx);
       ctx.ui = ui(ctx);
@@ -53,13 +55,15 @@ module.exports = function(ctx) {
         setup.connect();
       } else {
         map.on('load', setup.connect);
-        mapLoadedInterval = setInterval(() => { if (map.loaded()) setup.connect(); }, 16);
+        mapLoadedInterval = setInterval(function () {
+          if (map.loaded()) setup.connect();
+        }, 16);
       }
 
       ctx.events.start();
       return controlContainer;
     },
-    addLayers: function() {
+    addLayers: function addLayers() {
       // drawn features style
       ctx.map.addSource(Constants.sources.COLD, {
         data: {
@@ -78,7 +82,7 @@ module.exports = function(ctx) {
         type: 'geojson'
       });
 
-      ctx.options.styles.forEach(style => {
+      ctx.options.styles.forEach(function (style) {
         ctx.map.addLayer(style);
       });
 
@@ -86,8 +90,8 @@ module.exports = function(ctx) {
     },
     // Check for layers and sources before attempting to remove
     // If user adds draw control and removes it before the map is loaded, layers and sources will be missing
-    removeLayers: function() {
-      ctx.options.styles.forEach(style => {
+    removeLayers: function removeLayers() {
+      ctx.options.styles.forEach(function (style) {
         if (ctx.map.getLayer(style.id)) {
           ctx.map.removeLayer(style.id);
         }
@@ -107,3 +111,4 @@ module.exports = function(ctx) {
 
   return setup;
 };
+//# sourceMappingURL=setup.js.map
