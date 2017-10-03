@@ -14,9 +14,9 @@ module.exports = function(ctx) {
       ctx.map.off('load', setup.connect);
       clearInterval(mapLoadedInterval);
 
-      // setup.removeLayers();
-      // ctx.ui.removeButtons();
-      // ctx.events.removeEventListeners();
+      setup.removeLayers();
+      ctx.ui.removeButtons();
+      ctx.events.removeEventListeners();
       ctx.map = null;
       ctx.container = null;
       ctx.store = null;
@@ -88,16 +88,16 @@ module.exports = function(ctx) {
     // If user adds draw control and removes it before the map is loaded, layers and sources will be missing
     removeLayers: function() {
       ctx.options.styles.forEach(style => {
-        if (ctx.map.getLayer(style.id)) {
+        if (ctx && ctx.map && ctx.map.getLayer(style.id)) {
           ctx.map.removeLayer(style.id);
         }
       });
 
-      if (ctx.map.getSource(Constants.sources.COLD)) {
+      if (ctx && ctx.map && ctx.map.getSource(Constants.sources.COLD)) {
         ctx.map.removeSource(Constants.sources.COLD);
       }
 
-      if (ctx.map.getSource(Constants.sources.HOT)) {
+      if (ctx && ctx.map && ctx.map.getSource(Constants.sources.HOT)) {
         ctx.map.removeSource(Constants.sources.HOT);
       }
     }
